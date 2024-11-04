@@ -141,7 +141,7 @@ ui <- dashboardPage(
             tags$img(src = "Søholt storskov fig.png", width = "100%", height = "100%"),
             tags$br(),
             h6("This project is supported by Aage V. Jensens Naturfond"),
-            tags$img(src = "Aage_logo.png", width = 200, height = 200),
+            tags$img(src = "Aage_logo.jpeg", width = 200, height = 200),
             h6("Any inquiries can be addressed to ",mailtoR(email = "Jonassoe@biology.sdu.dk",
                     text = "Jonas Stage Sø")),
           )),
