@@ -67,6 +67,11 @@ wms_url <- "https://api.dataforsyningen.dk/orto_foraar_DAF?token=3d6237caab02879
 
 ##### Observations #####
 
+read_csv("Data/GHG/oktober_ghg.csv") %>% 
+  pivot_longer(co2_flux:ebul_ch4) %>% 
+  mutate(name = as_factor(name),
+         name = factor(name, levels = c("ebul_ch4","diff_ch4","co2_flux"))) -> ghg_results
+
 readxl::read_excel("Data/Røgbølle sø fiskeundersøgelse sep 2024.xlsx") %>% 
   rename(date = 1, garn = 3, art = 4, length = 5, weight = 6) %>% 
   select(-Sø) %>% 
@@ -147,7 +152,7 @@ ui <- dashboardPage(
           )),
         tabItem(tabName = "map",
           fluidRow(
-            h2("Select a location to explore the data from this site"),
+            h2("Select a location to explore data from this site"),
             br(),
             leafletOutput("site", width = "100%", height = "80vh")
         )),
@@ -182,7 +187,11 @@ ui <- dashboardPage(
             ),
         tabItem(tabName = "ghg",
           fluidRow(
-            h2("Data to come")))
+            h2("Here you will find data on greenhouse gas emissions"),
+            box(checkboxGroupInput("ghg_plot_select", "Select which type of flux you want to see", 
+                                   choices = c("Ebullitive Methane" = "ebul_ch4", "Diffusive Methane" = "diff_ch4","Diffusive Carbon Dioxide" = "co2_flux")),
+            sliderInput("ghg_range_select", "Zoom in on range ", min = -10000, max = 10000,value = c(-10000,10000)))),
+            plotOutput("ghg_plot", height = 600, width = 400))
     )))
 #### Server ####
 server <- function(input, output, session) {
@@ -267,6 +276,33 @@ server <- function(input, output, session) {
   
   chem_data_plot1 + chem_data_plot2 +plot_layout(guides = "collect", axes = "collect",axis_titles = "collect") & theme(legend.position = "bottom") })
 
+###### GHG ######
+  ghg_data <-  reactive({
+    ghg_results %>% 
+      filter(name %in% input$ghg_plot_select) -> ghg_select 
+    
+    updateSliderInput(session, "ghg_range_select", 
+                      value = c(floor(min(ghg_select$value,na.rm=T)), ceiling(max(ghg_select$value,na.rm=T))),
+                      min = floor(min(ghg_select$value,na.rm=T)), max = ceiling(max(ghg_select$value,na.rm=T)), step = 1)
+    
+    return(ghg_select)
+  })  
+  
+  output$ghg_plot<- renderPlot({
+  req(input$ghg_plot_select)
+  my_labeller <- as_labeller(c(co2_flux="CO[2]", diff_ch4="Diffusive~CH[4]", ebul_ch4="Ebullitive~CH[4]"),
+                               default = label_parsed)  
+  ghg_data() %>% 
+    ggplot(aes(as.factor(station), value, fill = as.factor(name))) + 
+    geom_boxplot(show.legend = F) + 
+    facet_grid(name~1, scales = "free",labeller = my_labeller) + 
+    coord_cartesian(ylim = c(input$ghg_range_select[1],input$ghg_range_select[2])) +
+    tema + 
+    theme(strip.text.x = element_blank()) + 
+    labs(x = "Station",
+         y = bquote("Flux (µmol m"^-2*" h"^-1*")"))
+  })
+  
 ###### Fish ######
   
   fish_data <-  reactive({
