@@ -85,10 +85,30 @@ read_delim("Data/Unders_gelsestype_20241021_063609/Vandkemi - Sø.csv",
          analysis = case_when(analysis=="Nitrogen,total N" ~ "Nitrogen, total-N",
                               analysis== "Alkalinitet,total TA" ~ "Alkalinitet",
                               T ~ analysis),
+         from = "Miljøportalen",
          label = paste0(analysis," (",unit,")"),
          label = as.factor(label),
-         label = factor(label, levels = c("Phosphor, total-P (mg/l)","Ortho-phosphat-P (mg/l)","Nitrogen, total-N (mg/l)","Ammoniak+ammonium-N (mg/l)","Nitrit+nitrat-N (mg/l)","Chlorophyl A (µg/l)","pH (pH)","Alkalinitet (mmol/l)"))) -> lake_chemistry
+         label = factor(label, levels = c("Phosphor, total-P (mg/l)","Ortho-phosphat-P (mg/l)","Nitrogen, total-N (mg/l)","Ammoniak+ammonium-N (mg/l)","Nitrit+nitrat-N (mg/l)","Chlorophyl A (µg/l)","pH (pH)","Alkalinitet (mmol/l)"))) -> lake_chemistry_miljo
 
+readxl::read_excel("Data/Røgbølle sø vandkemi SDU.xlsx") %>% 
+  rename("Phosphor, total-P" = 2, "Ortho-phosphat-P" = 3, "Chlorophyl A" = 4, "Nitrogen, total-N" = 5, "Nitrit+nitrat-N" = 6) %>% 
+  mutate(date = as.Date(`Sampling dato`),
+         doy = yday(date),
+         type = "Kemi",
+         year = year(date)) %>% 
+  pivot_longer("Phosphor, total-P":"Nitrit+nitrat-N") %>% 
+  select(date,analysis = name,value,doy,year,type) %>% 
+  mutate(unit = case_when(analysis %in% c("Phosphor, total-P","Nitrogen, total-N","Ammoniak+ammonium-N","Ortho-phosphat-P","Nitrit+nitrat-N"," Ammonium-N") ~ "mg/l",
+                          analysis == "Chlorophyl A" ~ "µg/l",
+                          analysis == "pH" ~ "pH",
+                          analysis == "Alkalinitet" ~ "mmol/l"),
+         from = "SDU",
+         label = paste0(analysis," (",unit,")"),
+         label = as.factor(label),
+         label = factor(label, levels = c("Phosphor, total-P (mg/l)","Ortho-phosphat-P (mg/l)","Nitrogen, total-N (mg/l)","Ammoniak+ammonium-N (mg/l)","Nitrit+nitrat-N (mg/l)","Chlorophyl A (µg/l)","pH (pH)","Alkalinitet (mmol/l)"))) -> lake_chemistry_sdu
+
+bind_rows(lake_chemistry_miljo,
+          lake_chemistry_sdu)  -> lake_chemistry
 
 #### UI ####
 
@@ -121,6 +141,8 @@ ui <- dashboardPage(
           )),
         tabItem(tabName = "map",
           fluidRow(
+            h2("Select a location to explore the data from this site"),
+            br(),
             leafletOutput("site", width = "100%", height = "80vh")
         )),
         tabItem(tabName = "data",
@@ -132,7 +154,7 @@ ui <- dashboardPage(
             h5("All of the data collected before 2024 is downloaded from Miljødata")),
             box(checkboxGroupInput("analysis_plot_select", "", 
                                     choices = c("Phosphor, total-P","Ortho-phosphat-P","Nitrogen, total-N","Ammoniak+ammonium-N","Nitrit+nitrat-N","Chlorophyl A","pH","Alkalinitet")),
-                sliderInput("chemistry_year_select", "Select years to display", min = 1973, max = 2022,value = c(1973,2022), sep = "")),
+                sliderInput("chemistry_year_select", "Select years to display", min = 1973, max = 2025,value = c(1973,2025), sep = "")),
           fluidRow(
             plotOutput("chem_plot_output", height = 800))),
         tabItem(tabName = "fish",
@@ -190,7 +212,7 @@ server <- function(input, output, session) {
   observeEvent(input$site_marker_click,{
     id_select <- input$site_marker_click$id
     type_select <- input$site_marker_click$group
-    if (type_select %in% c("Piezometer","Isco","Lake")) {updateTabItems(session, "tabs", selected = "water")}
+    if (type_select %in% c("Lake")) {updateTabItems(session, "tabs", selected = "water")}
     else if (type_select == "Greenhouse gas") updateTabItems(session, "tabs", selected = "ghg")
     else if (type_select == "Fish") updateTabItems(session, "tabs", selected = "fish")
     print(id_select);print(type_select)
@@ -217,7 +239,7 @@ server <- function(input, output, session) {
             strip.text.y = element_blank()) +
       scale_color_viridis_c() + 
       tema + 
-      labs(x = "Year",
+      labs(x = "",
            y = "",
            col = "Year")  +
       facet_grid(label~1, scales = "free")
