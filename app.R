@@ -138,7 +138,7 @@ ui <- dashboardPage(
             #Søholt Storskov - værkstedsområde for studier i positive effekter af genopretning af naturlig hydrologi
             h4("Start by pressing one of the menus on the left side"),
             tags$br(),
-            tags$img(src = "Søholt storskov fig.png", width = "100%", height = "100%"),
+            tags$img(src = "Søholt storskov fig.png", width = "40%", height = "40%"),
             tags$br(),
             h6("This project is supported by Aage V. Jensens Naturfond"),
             tags$img(src = "Aage_logo.jpeg", width = 200, height = 200),
