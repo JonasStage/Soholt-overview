@@ -22,8 +22,11 @@ readxl::read_excel("Data/Røgbølle_stationer.xlsx") %>%
          lat = E) %>% 
   mutate(long = as.numeric(long),
          lat = as.numeric(lat),
+         station = parse_number(station),
+         station = as.character(station),
          type = "Greenhouse gas",
-         id = as.character(station))-> ghg_station
+         id = as.character(station),
+         id = paste0(month,"_",station))-> ghg_station
 
 read_csv("Data/garn_location.csv") %>% 
   rename(long = y,
@@ -131,11 +134,14 @@ ui <- dashboardPage(
           fluidRow(
             h1("Welcome to this page dedicated to the project 'ENHANCE' at Søholt Storskov"),
             tags$br(),
-            h4("Here you will find information about locations and data from the project: 'Søholt Storskov - værkstedsområde for studier i positive effekter af genopretning af naturlig hydrologi'"),
+            h4("Here you will find information regarding locations and data from the project: 'Søholt Storskov - værkstedsområde for studier i positive effekter af genopretning af naturlig hydrologi'"),
             #Søholt Storskov - værkstedsområde for studier i positive effekter af genopretning af naturlig hydrologi
-            h4("Start by pressing one the menus one the left side"),
-            tags$br(),tags$br(),tags$br(),tags$br(),
+            h4("Start by pressing one of the menus on the left side"),
+            tags$br(),
+            tags$img(src = "Søholt storskov fig.png", width = "100%", height = "100%"),
+            tags$br(),
             h6("This project is supported by Aage V. Jensens Naturfond"),
+            tags$img(src = "Aage_logo.png", width = 200, height = 200),
             h6("Any inquiries can be addressed to ",mailtoR(email = "Jonassoe@biology.sdu.dk",
                     text = "Jonas Stage Sø")),
           )),
