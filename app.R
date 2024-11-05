@@ -2,6 +2,7 @@ library(shiny);library(leaflet);library(sf);library(tidyverse);library(shinydash
 source("ggplot_themes.R")
 library(mailtoR)
 
+getwd()
 #### Data ####
 ##### Locations #####
 read_csv("Data/SDU_målepunkter_2024.csv") %>% 
