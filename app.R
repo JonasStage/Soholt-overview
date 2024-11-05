@@ -5,7 +5,7 @@ library(mailtoR)
 getwd()
 #### Data ####
 ##### Locations #####
-read_csv("Data/SDU_målepunkter_2024.csv") %>% 
+read_csv("Data/SDU_locations_2024.csv") %>% 
   tibble() %>% 
   rename(long = N_Coordina, 
          lat = E_Coordina) %>% 
