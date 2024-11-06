@@ -5,7 +5,7 @@ account: jonassoe
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13023242
-bundleId: 9313644
+bundleId: 9323565
 url: https://jonassoe.shinyapps.io/sholt_overview/
 version: 1
 asMultiple: FALSE
