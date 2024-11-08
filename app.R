@@ -2,7 +2,6 @@ library(shiny);library(leaflet);library(sf);library(tidyverse);library(shinydash
 source("ggplot_themes.R")
 library(mailtoR)
 
-getwd()
 #### Data ####
 ##### Locations #####
 read_csv("Data/SDU_locations_2024.csv") %>% 
@@ -202,7 +201,7 @@ server <- function(input, output, session) {
     leaflet() %>%
       addWMSTiles(
         wms_url,
-        layers = "geodanmark_2023_12_5cm", 
+        layers = "geodanmark_2024_12_5cm", 
         options = c(WMSTileOptions(format = "image/png", transparent = T),
                     providerTileOptions(minZoom = 1, maxZoom = 100))) %>% 
       addPolylines(data = streams, opacity = 1, fillColor = "blue", group = "Water") %>% 
