@@ -201,7 +201,7 @@ server <- function(input, output, session) {
     leaflet() %>%
       addWMSTiles(
         wms_url,
-        layers = "geodanmark_2024_12_5cm", 
+        layers = "geodanmark_2023_12_5cm", 
         options = c(WMSTileOptions(format = "image/png", transparent = T),
                     providerTileOptions(minZoom = 1, maxZoom = 100))) %>% 
       addPolylines(data = streams, color = "blue",fillOpacity = 1,opacity =1, group = "Water") %>% 
